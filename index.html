@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Переход на сайт</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Tahoma, Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            color: white;
+            font-size: 18px;
+            padding: 12px 24px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 15px;
+            font-family: Tahoma, Arial, sans-serif;
+        }
+        
+        .btn-blue {
+            background-color: #0078D7;
+        }
+        
+        .btn-blue:hover {
+            background-color: #0066B4;
+        }
+        
+        .btn-green {
+            background-color: #28a745;
+        }
+        
+        .btn-green:hover {
+            background-color: #218838;
+        }
+        
+        .note {
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Переход на сайт</h1>
+        <p>Выберите действие:</p>
+        
+        <button class="btn btn-blue" onclick="redirectToSite()">Перейти к игре</button>
+        <button class="btn btn-green" onclick="downloadAPK()">Скачать APK</button>
+        
+        <p class="note">После нажатия кнопки вы будете перенаправлены на другой сайт или начнется загрузка файла</p>
+    </div>
+
+    <script>
+        function redirectToSite() {
+            window.location.href = "https://123asxcqasdc.github.io/uliigra2/";
+        }
+        
+        function downloadAPK() {
+            // Здесь должен быть URL для скачивания APK файла
+            // Замените на реальный URL вашего APK файла
+            window.location.href = "https://example.com/game.apk";
+        }
+    </script>
+</body>
+</html>
