@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лаунчер Ули игры</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Tahoma, Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            margin: 50px auto;
+            background-color: white;
+            padding: 30px;
+            border: 1px solid #ccc;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        
+        p {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+        
+        .buttons-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .button-column {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            color: white;
+            font-size: 18px;
+            padding: 15px 10px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 15px;
+            font-family: Tahoma, Arial, sans-serif;
+            text-align: center;
+        }
+        
+        .btn-blue {
+            background-color: #0078D7;
+        }
+        
+        .btn-blue:hover {
+            background-color: #0066B4;
+        }
+        
+        .btn-telegram {
+            background-color: #0088cc;
+        }
+        
+        .btn-telegram:hover {
+            background-color: #0077b5;
+        }
+        
+        .btn-green {
+            background-color: #28a745;
+        }
+        
+        .btn-green:hover {
+            background-color: #218838;
+        }
+        
+        .btn-purple {
+            background-color: #6f42c1;
+        }
+        
+        .btn-purple:hover {
+            background-color: #5a32a3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Лаунчер Ули игры</h1>
+        <p>Запускайте Ули игру на разных устройствах</p>
+        
+        <div class="buttons-grid">
+            <div class="button-column">
+                <button class="btn btn-blue" onclick="redirectToSite()">Запустить игру онлайн</button>
+                <button class="btn btn-green" onclick="downloadAPK()">Скачать APK для Android</button>
+            </div>
+            <div class="button-column">
+                <button class="btn btn-telegram" onclick="openTelegram()">Запустить в Telegram</button>
+                <button class="btn btn-purple" onclick="downloadEXE()">Скачать EXE для Windows</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function redirectToSite() {
+            window.location.href = "https://123asxcqasdc.github.io/uliigra2/";
+        }
+        
+        function openTelegram() {
+            window.location.href = "https://t.me/uliigra2bot";
+        }
+        
+        function downloadAPK() {
+            window.location.href = "https://u.c6t.ru/snail.apk";
+        }
+        
+        function downloadEXE() {
+            window.location.href = "https://drive.google.com/uc?id=1cfTwuVjeHwkRgcU7zTfHYxm4ZMfZd0l8";
+        }
+    </script>
+</body>
+</html>
