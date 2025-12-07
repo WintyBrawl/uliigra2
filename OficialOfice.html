@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Clone - Текстовый редактор</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* Панель заголовка */
+        .title-bar {
+            background: #2d2d2d;
+            color: white;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        
+        .app-title i {
+            color: #4CAF50;
+        }
+        
+        .window-controls {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .window-controls span {
+            cursor: pointer;
+            font-size: 16px;
+            padding: 2px 8px;
+        }
+        
+        .window-controls span:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        /* Лента инструментов */
+        .ribbon {
+            background: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+            padding: 5px 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .ribbon-tabs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .ribbon-tab {
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        
+        .ribbon-tab.active {
+            background: #e1e1e1;
+            font-weight: 600;
+        }
+        
+        .ribbon-tab:hover {
+            background: #e9e9e9;
+        }
+        
+        .toolbar-groups {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+        
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tool-group-title {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .tool-button {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .tool-button:hover {
+            background: #f0f0f0;
+            border-color: #ccc;
+        }
+        
+        .tool-button.active {
+            background: #e0e0e0;
+            border-color: #bbb;
+        }
+        
+        .select-tool {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background: white;
+        }
+        
+        /* Контейнер документа */
+        .document-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            margin: 10px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+            border-radius: 3px;
+        }
+        
+        /* Боковая панель */
+        .sidebar {
+            width: 200px;
+            background: #f8f8f8;
+            border-right: 1px solid #ddd;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+        
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .sidebar-item {
+            padding: 8px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sidebar-item:hover {
+            background: #e9e9e9;
+        }
+        
+        /* Область редактирования */
+        .editor-area {
+            flex: 1;
+            padding: 20px 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        #documentContent {
+            min-height: 100%;
+            outline: none;
+            line-height: 1.5;
+            font-size: 11pt;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .page {
+            background: white;
+            min-height: 100%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            padding: 70px 50px;
+            margin: 0 auto;
+            max-width: 21cm;
+        }
+        
+        /* Статус бар */
+        .status-bar {
+            background: #f0f0f0;
+            border-top: 1px solid #ddd;
+            padding: 5px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .status-left, .status-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .zoom-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        .zoom-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 5px;
+            padding: 20px;
+            min-width: 400px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .close-modal {
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 160px;
+            }
+            
+            .toolbar-groups {
+                gap: 15px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .ribbon {
+                overflow-x: auto;
+            }
+            
+            .toolbar-groups {
+                flex-wrap: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Панель заголовка -->
+        <div class="title-bar">
+            <div class="app-title">
+                <i class="fas fa-file-word"></i>
+                <span>Word Clone - Документ1</span>
+            </div>
+            <div class="window-controls">
+                <span><i class="fas fa-minus"></i></span>
+                <span><i class="fas fa-square"></i></span>
+                <span><i class="fas fa-times"></i></span>
+            </div>
+        </div>
+        
+        <!-- Лента инструментов -->
+        <div class="ribbon">
+            <div class="ribbon-tabs">
+                <div class="ribbon-tab active" data-tab="home">Главная</div>
+                <div class="ribbon-tab" data-tab="insert">Вставка</div>
+                <div class="ribbon-tab" data-tab="layout">Макет</div>
+                <div class="ribbon-tab" data-tab="review">Рецензирование</div>
+                <div class="ribbon-tab" data-tab="view">Вид</div>
+            </div>
+            
+            <div class="toolbar-groups" id="home-tools">
+                <!-- Буфер обмена -->
+                <div class="tool-group">
+                    <div class="tool-group-title">Буфер обмена</div>
+                    <div>
+                        <button class="tool-button" data-command="paste">
+                            <i class="fas fa-paste"></i> Вставить
+                        </button>
+                        <button class="tool-button" data-command="copy">
+                            <i class="far fa-copy"></i> Копировать
+                        </button>
+                        <button class="tool-button" data-command="cut">
+                            <i class="fas fa-cut"></i> Вырезать
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Шрифт -->
+                <div class="tool-group">
+                    <div class="tool-group-title">Шрифт</div>
+                    <div>
+                        <select class="select-tool" id="fontFamily">
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Calibri">Calibri</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Verdana">Verdana</option>
+                        </select>
+                        <select class="select-tool" id="fontSize">
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11" selected>11</option>
+                            <option value="12">12</option>
+                            <option value="14">14</option>
+                            <option value="16">16</option>
+                            <option value="18">18</option>
+                        </select>
+                        <button class="tool-button" data-command="bold">
+                            <i class="fas fa-bold"></i>
+                        </button>
+                        <button class="tool-button" data-command="italic">
+                            <i class="fas fa-italic"></i>
+                        </button>
+                        <button class="tool-button" data-command="underline">
+                            <i class="fas fa-underline"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Абзац -->
+                <div class="tool-group">
+                    <div class="tool-group-title">Абзац</div>
+                    <div>
+                        <button class="tool-button" data-command="justifyLeft">
+                            <i class="fas fa-align-left"></i>
+                        </button>
+                        <button class="tool-button" data-command="justifyCenter">
+                            <i class="fas fa-align-center"></i>
+                        </button>
+                        <button class="tool-button" data-command="justifyRight">
+                            <i class="fas fa-align-right"></i>
+                        </button>
+                        <button class="tool-button" data-command="justifyFull">
+                            <i class="fas fa-align-justify"></i>
+                        </button>
+                        <button class="tool-button" data-command="insertUnorderedList">
+                            <i class="fas fa-list-ul"></i>
+                        </button>
+                        <button class="tool-button" data-command="insertOrderedList">
+                            <i class="fas fa-list-ol"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Стили -->
+                <div class="tool-group">
+                    <div class="tool-group-title">Стили</div>
+                    <div>
+                        <select class="select-tool" id="headingStyle">
+                            <option value="p">Обычный текст</option>
+                            <option value="h1">Заголовок 1</option>
+                            <option value="h2">Заголовок 2</option>
+                            <option value="h3">Заголовок 3</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Вкладка "Вставка" (скрыта по умолчанию) -->
+            <div class="toolbar-groups" id="insert-tools" style="display: none;">
+                <div class="tool-group">
+                    <div class="tool-group-title">Вставка</div>
+                    <div>
+                        <button class="tool-button" id="insertImage">
+                            <i class="far fa-image"></i> Изображение
+                        </button>
+                        <button class="tool-button" id="insertLink">
+                            <i class="fas fa-link"></i> Ссылка
+                        </button>
+                        <button class="tool-button" id="insertTable">
+                            <i class="fas fa-table"></i> Таблица
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Контейнер документа -->
+        <div class="document-container">
+            <!-- Боковая панель -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Навигация</div>
+                    <div class="sidebar-item">
+                        <i class="far fa-file"></i> Документ1
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="far fa-save"></i> Сохранить
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="fas fa-print"></i> Печать
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Страницы</div>
+                    <div class="sidebar-item">
+                        <i class="far fa-copy"></i> Обложка
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="far fa-file-alt"></i> Пустая страница
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="fas fa-columns"></i> Разрыв страницы
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Справка</div>
+                    <div class="sidebar-item" id="showHelp">
+                        <i class="far fa-question-circle"></i> Справка
+                    </div>
+                    <div class="sidebar-item" id="showAbout">
+                        <i class="far fa-smile"></i> О программе
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Область редактирования -->
+            <div class="editor-area">
+                <div class="page">
+                    <div id="documentContent" contenteditable="true">
+                        <h1>Добро пожаловать в Word Clone</h1>
+                        <p>Это упрощенный клон Microsoft Word, созданный с использованием HTML, CSS и JavaScript.</p>
+                        <p>Вы можете редактировать этот текст, используя панель инструментов выше. Попробуйте изменить шрифт, размер текста или применить стили.</p>
+                        <p>Для форматирования выделите текст и нажмите на соответствующие кнопки на панели инструментов.</p>
+                        <ul>
+                            <li>Создавайте документы</li>
+                            <li>Форматируйте текст</li>
+                            <li>Сохраняйте и печатайте</li>
+                        </ul>
+                        <p>Это демонстрационная версия с основными функциями текстового редактора.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Статус бар -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span>Страница: 1 из 1</span>
+                <span>Слов: <span id="wordCount">45</span></span>
+            </div>
+            <div class="status-right">
+                <div class="zoom-controls">
+                    <span class="zoom-btn" id="zoomOut">-</span>
+                    <span id="zoomLevel">100%</span>
+                    <span class="zoom-btn" id="zoomIn">+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно помощи -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Справка Word Clone</div>
+                <div class="close-modal" id="closeHelp">&times;</div>
+            </div>
+            <div class="modal-body">
+                <p><strong>Word Clone</strong> - это упрощенный текстовый редактор с основными функциями:</p>
+                <ul>
+                    <li>Форматирование текста (жирный, курсив, подчеркивание)</li>
+                    <li>Изменение шрифта и размера текста</li>
+                    <li>Выравнивание текста</li>
+                    <li>Создание списков</li>
+                    <li>Применение стилей заголовков</li>
+                    <li>Подсчет слов</li>
+                    <li>Масштабирование документа</li>
+                </ul>
+                <p>Для форматирования выделите текст и используйте кнопки на панели инструментов.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="closeHelpBtn">Закрыть</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно "О программе" -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">О программе Word Clone</div>
+                <div class="close-modal" id="closeAbout">&times;</div>
+            </div>
+            <div class="modal-body">
+                <p><strong>Word Clone v1.0</strong></p>
+                <p>Упрощенный клон Microsoft Word, созданный на чистом HTML, CSS и JavaScript.</p>
+                <p>Данное приложение демонстрирует возможности создания офисных приложений в браузере.</p>
+                <p>Функции реализованы с использованием ContentEditable API и команд document.execCommand.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="closeAboutBtn">Закрыть</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для вставки ссылки -->
+    <div class="modal" id="linkModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Вставка ссылки</div>
+                <div class="close-modal" id="closeLinkModal">&times;</div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="linkUrl">URL адрес:</label>
+                    <input type="text" class="form-input" id="linkUrl" placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="linkText">Текст ссылки:</label>
+                    <input type="text" class="form-input" id="linkText" placeholder="Текст ссылки">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelLink">Отмена</button>
+                <button class="btn btn-primary" id="insertLinkBtn">Вставить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Элементы DOM
+            const documentContent = document.getElementById('documentContent');
+            const ribbonTabs = document.querySelectorAll('.ribbon-tab');
+            const toolButtons = document.querySelectorAll('.tool-button');
+            const selectTools = document.querySelectorAll('.select-tool');
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const zoomLevel = document.getElementById('zoomLevel');
+            const wordCount = document.getElementById('wordCount');
+            const fontFamily = document.getElementById('fontFamily');
+            const fontSize = document.getElementById('fontSize');
+            const headingStyle = document.getElementById('headingStyle');
+            const showHelp = document.getElementById('showHelp');
+            const showAbout = document.getElementById('showAbout');
+            const helpModal = document.getElementById('helpModal');
+            const aboutModal = document.getElementById('aboutModal');
+            const closeHelp = document.getElementById('closeHelp');
+            const closeHelpBtn = document.getElementById('closeHelpBtn');
+            const closeAbout = document.getElementById('closeAbout');
+            const closeAboutBtn = document.getElementById('closeAboutBtn');
+            const insertImage = document.getElementById('insertImage');
+            const insertLink = document.getElementById('insertLink');
+            const insertTable = document.getElementById('insertTable');
+            const linkModal = document.getElementById('linkModal');
+            const closeLinkModal = document.getElementById('closeLinkModal');
+            const cancelLink = document.getElementById('cancelLink');
+            const insertLinkBtn = document.getElementById('insertLinkBtn');
+            const linkUrl = document.getElementById('linkUrl');
+            const linkText = document.getElementById('linkText');
+            
+            // Переключение вкладок ленты
+            ribbonTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Убираем активный класс у всех вкладок
+                    ribbonTabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Добавляем активный класс текущей вкладке
+                    this.classList.add('active');
+                    
+                    // Показываем соответствующие инструменты
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById('home-tools').style.display = 'none';
+                    document.getElementById('insert-tools').style.display = 'none';
+                    
+                    if (tabId === 'home') {
+                        document.getElementById('home-tools').style.display = 'flex';
+                    } else if (tabId === 'insert') {
+                        document.getElementById('insert-tools').style.display = 'flex';
+                    }
+                });
+            });
+            
+            // Обработка кнопок форматирования
+            toolButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const command = this.getAttribute('data-command');
+                    
+                    // Выделяем текст, если ничего не выделено
+                    if (!document.getSelection().toString()) {
+                        const range = document.createRange();
+                        range.selectNodeContents(documentContent);
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+                    
+                    // Выполняем команду форматирования
+                    document.execCommand(command, false, null);
+                    
+                    // Снимаем выделение
+                    window.getSelection().removeAllRanges();
+                    
+                    // Обновляем подсчет слов
+                    updateWordCount();
+                });
+            });
+            
+            // Обработка выбора шрифта
+            fontFamily.addEventListener('change', function() {
+                document.execCommand('fontName', false, this.value);
+                updateWordCount();
+            });
+            
+            // Обработка выбора размера шрифта
+            fontSize.addEventListener('change', function() {
+                document.execCommand('fontSize', false, this.value);
+                updateWordCount();
+            });
+            
+            // Обработка выбора стиля заголовка
+            headingStyle.addEventListener('change', function() {
+                const tag = this.value;
+                
+                if (tag === 'p') {
+                    document.execCommand('formatBlock', false, '<p>');
+                } else {
+                    document.execCommand('formatBlock', false, `<${tag}>`);
+                }
+                
+                updateWordCount();
+            });
+            
+            // Масштабирование
+            let currentZoom = 100;
+            
+            zoomInBtn.addEventListener('click', function() {
+                if (currentZoom < 200) {
+                    currentZoom += 10;
+                    updateZoom();
+                }
+            });
+            
+            zoomOutBtn.addEventListener('click', function() {
+                if (currentZoom > 50) {
+                    currentZoom -= 10;
+                    updateZoom();
+                }
+            });
+            
+            function updateZoom() {
+                zoomLevel.textContent = currentZoom + '%';
+                documentContent.style.transform = `scale(${currentZoom / 100})`;
+                documentContent.style.transformOrigin = 'top left';
+            }
+            
+            // Подсчет слов
+            function updateWordCount() {
+                const text = documentContent.innerText || documentContent.textContent;
+                const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+                wordCount.textContent = words.length;
+            }
+            
+            // Обновляем подсчет слов при изменении содержимого
+            documentContent.addEventListener('input', updateWordCount);
+            
+            // Модальные окна
+            showHelp.addEventListener('click', function() {
+                helpModal.style.display = 'flex';
+            });
+            
+            showAbout.addEventListener('click', function() {
+                aboutModal.style.display = 'flex';
+            });
+            
+            closeHelp.addEventListener('click', function() {
+                helpModal.style.display = 'none';
+            });
+            
+            closeHelpBtn.addEventListener('click', function() {
+                helpModal.style.display = 'none';
+            });
+            
+            closeAbout.addEventListener('click', function() {
+                aboutModal.style.display = 'none';
+            });
+            
+            closeAboutBtn.addEventListener('click', function() {
+                aboutModal.style.display = 'none';
+            });
+            
+            // Закрытие модальных окон при клике вне их
+            window.addEventListener('click', function(event) {
+                if (event.target === helpModal) {
+                    helpModal.style.display = 'none';
+                }
+                if (event.target === aboutModal) {
+                    aboutModal.style.display = 'none';
+                }
+                if (event.target === linkModal) {
+                    linkModal.style.display = 'none';
+                }
+            });
+            
+            // Вставка изображения
+            insertImage.addEventListener('click', function() {
+                const url = prompt('Введите URL изображения:', 'https://via.placeholder.com/400x200');
+                if (url) {
+                    document.execCommand('insertImage', false, url);
+                    updateWordCount();
+                }
+            });
+            
+            // Вставка таблицы
+            insertTable.addEventListener('click', function() {
+                const rows = prompt('Введите количество строк:', '3');
+                const cols = prompt('Введите количество столбцов:', '3');
+                
+                if (rows && cols) {
+                    let tableHTML = '<table border="1" style="border-collapse: collapse; width: 100%;">';
+                    
+                    for (let i = 0; i < rows; i++) {
+                        tableHTML += '<tr>';
+                        for (let j = 0; j < cols; j++) {
+                            tableHTML += `<td style="padding: 5px; border: 1px solid #ddd;">Ячейка ${i+1}-${j+1}</td>`;
+                        }
+                        tableHTML += '</tr>';
+                    }
+                    
+                    tableHTML += '</table>';
+                    
+                    document.execCommand('insertHTML', false, tableHTML);
+                    updateWordCount();
+                }
+            });
+            
+            // Вставка ссылки
+            insertLink.addEventListener('click', function() {
+                // Заполняем поля текущим выделенным текстом
+                const selectedText = window.getSelection().toString();
+                if (selectedText) {
+                    linkText.value = selectedText;
+                }
+                
+                linkModal.style.display = 'flex';
+            });
+            
+            closeLinkModal.addEventListener('click', function() {
+                linkModal.style.display = 'none';
+            });
+            
+            cancelLink.addEventListener('click', function() {
+                linkModal.style.display = 'none';
+            });
+            
+            insertLinkBtn.addEventListener('click', function() {
+                const url = linkUrl.value.trim();
+                const text = linkText.value.trim();
+                
+                if (url && text) {
+                    // Создаем HTML для ссылки
+                    const linkHTML = `<a href="${url}" target="_blank">${text}</a>`;
+                    
+                    // Вставляем ссылку
+                    document.execCommand('insertHTML', false, linkHTML);
+                    
+                    // Очищаем форму и закрываем модальное окно
+                    linkUrl.value = '';
+                    linkText.value = '';
+                    linkModal.style.display = 'none';
+                    
+                    updateWordCount();
+                } else {
+                    alert('Пожалуйста, заполните все поля');
+                }
+            });
+            
+            // Инициализация при загрузке
+            updateWordCount();
+            
+            // Обработка сочетаний клавиш
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+B - жирный
+                if (e.ctrlKey && e.key === 'b') {
+                    e.preventDefault();
+                    document.execCommand('bold', false, null);
+                }
+                
+                // Ctrl+I - курсив
+                if (e.ctrlKey && e.key === 'i') {
+                    e.preventDefault();
+                    document.execCommand('italic', false, null);
+                }
+                
+                // Ctrl+U - подчеркивание
+                if (e.ctrlKey && e.key === 'u') {
+                    e.preventDefault();
+                    document.execCommand('underline', false, null);
+                }
+                
+                // Ctrl+S - сохранить (симуляция)
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    alert('Документ сохранен (в реальном приложении здесь была бы функция сохранения файла)');
+                }
+            });
+            
+            // Окно предупреждения при закрытии
+            window.addEventListener('beforeunload', function(e) {
+                // В реальном приложении здесь проверялись бы изменения в документе
+                // e.preventDefault();
+                // e.returnValue = '';
+            });
+        });
+    </script>
+</body>
+</html>
